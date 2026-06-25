@@ -1,27 +1,654 @@
-<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>ArcPay</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#050a14;color:#fff;font-family:monospace;min-height:100vh;max-width:480px;margin:0 auto;padding:20px 16px}.h{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(245,158,11,.2)}.la{display:flex;align-items:center;gap:8px}.li{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#000}.l1{font-size:18px;font-weight:bold;color:#f59e0b}.ls{font-size:10px;color:rgba(255,255,255,.4)}.wi{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 12px}.dot{width:8px;height:8px;border-radius:50%;background:#22c55e}.s{border:1px solid;border-radius:8px;padding:10px;margin-bottom:16px;font-size:13px;display:none}.s.ok{background:rgba(34,197,94,.15);border-color:#22c55e;color:#22c55e}.s.er{background:rgba(239,68,68,.15);border-color:#ef4444;color:#ef4444}.s.ld{background:rgba(251,191,36,.15);border-color:#fbbf24;color:#fbbf24}.bc{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(217,119,6,.05));border:1px solid rgba(245,158,11,.3);border-radius:16px;padding:20px;text-align:center;margin-bottom:20px}.bl{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:2px;margin-bottom:8px}.ba{font-size:42px;font-weight:bold;color:#f59e0b}.bs{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px}.tl{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}.mc{border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;cursor:pointer;display:flex;align-items:center;margin-bottom:8px;background:rgba(255,255,255,.03)}.mc.sel{border-color:#f59e0b;background:rgba(245,158,11,.1)}.me{font-size:24px;margin-right:12px}.mn{font-size:14px;font-weight:bold}.pb{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;border:none;border-radius:12px;padding:16px;font-weight:bold;width:100%;cursor:pointer;margin-bottom:16px}.pb:disabled{opacity:.5}.tc{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:14px;display:none}.tll{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:6px}.ti{font-size:12px;color:#22c55e;margin-bottom:6px;word-break:break-all}.tlink{font-size:12px;color:#60a5fa;text-decoration:none}.ft{text-align:center;font-size:11px;color:rgba(255,255,255,.3);margin-top:32px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05)}.np-display{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:16px 20px 12px;text-align:right;margin-bottom:12px}.np-amount{font-size:42px;font-weight:bold;color:#f59e0b;line-height:1;word-break:break-all}.np-unit{font-size:13px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-top:4px}.np-cursor{display:inline-block;width:2px;height:38px;background:#f59e0b;vertical-align:middle;margin-left:3px;animation:blink 1s step-end infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}.np-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}.np-key{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:22px;font-family:monospace;font-weight:600;padding:16px 0;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}.np-key:active{background:rgba(245,158,11,.25)}.np-back{color:#f59e0b}.np-presets{display:flex;gap:8px;margin-bottom:12px}.np-preset{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.7);font-size:13px;padding:8px 0;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}.np-preset:active{background:rgba(245,158,11,.2);border-color:#f59e0b;color:#f59e0b}</style></head><body><div class=h><div class=la><div class=li>A</div><div><div class=l1>ArcPay</div><div class=ls>Merchant Payments on Arc L1</div></div></div><div class=wi><div class=dot></div><span style=font-size:12px;color:rgba(255,255,255,.7)>0x0860...8a</span></div></div><div class=s id=s></div><div class=bc><div class=bl>USDC BALANCE</div><div class=ba id=bal>--</div><div class=bs>Arc Testnet</div></div><div class=tl>Select Merchant</div><div id=ms></div><div class=tl style=margin-top:20px>AI Payment Input</div><div style="display:flex;gap:8px;margin-bottom:16px"><input id=ai-input type=text placeholder="e.g. pay john 5 usdc" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px;color:#fff;font-family:monospace;font-size:14px;outline:none" /><button onclick=parseAI() style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;padding:12px 16px;color:#000;font-weight:bold;font-family:monospace;cursor:pointer">Parse</button></div><div id=ai-result style="display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px;margin-bottom:12px;font-size:13px;color:#f59e0b"></div><div class=tl style=margin-top:20px>Amount (USDC)</div><div class=np-display><div class=np-amount id=np-val>0<span class=np-cursor></span></div><div class=np-unit>USDC</div></div><div class=np-presets><div class=np-preset onclick="npPreset('1')">1</div><div class=np-preset onclick="npPreset('5')">5</div><div class=np-preset onclick="npPreset('10')">10</div><div class=np-preset onclick="npPreset('20')">20</div></div><div class=np-grid><div class=np-key onclick="npKey('1')">1</div><div class=np-key onclick="npKey('2')">2</div><div class=np-key onclick="npKey('3')">3</div><div class=np-key onclick="npKey('4')">4</div><div class=np-key onclick="npKey('5')">5</div><div class=np-key onclick="npKey('6')">6</div><div class=np-key onclick="npKey('7')">7</div><div class=np-key onclick="npKey('8')">8</div><div class=np-key onclick="npKey('9')">9</div><div class=np-key onclick="npKey('.')">.</div><div class=np-key onclick="npKey('0')">0</div><div class="np-key np-back" onclick=npBack()>&#9003;</div></div><input type=hidden id=amt><div id=conf style="display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:16px;margin-bottom:12px"><div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:8px">CONFIRM PAYMENT</div><div id=conf-detail style="font-size:16px;font-weight:bold;color:#fff;margin-bottom:12px"></div><div style="display:flex;gap:8px"><button onclick=cancelPay() style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px;color:#fff;font-family:monospace;font-size:14px;cursor:pointer">Cancel</button><button onclick=confirmPay() style="flex:1;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:10px;padding:12px;color:#000;font-family:monospace;font-size:14px;font-weight:bold;cursor:pointer">Confirm</button></div></div><button class=pb id=pb onclick=initPay()>Pay USDC</button><div class=tc id=tc><div class=tll>LAST TRANSACTION</div><div class=ti id=tid></div><a href=https://testnet.arcscan.app target=_blank class=tlink>View on ArcScan</a></div><div style="margin-bottom:20px"><div class=tl style="margin-top:20px">Transaction History</div><div id=th style="max-height:300px;overflow-y:auto"></div></div><div class=ft>Powered by <span style=color:#f59e0b>Arc L1</span> &middot; <span style=color:#60a5fa>Circle</span></div><script>let sel=null;const A="http://localhost:8080";function sh(m,t){const e=document.getElementById("s");e.textContent=m;e.className="s "+t;if(t!=="ld")setTimeout(()=>{e.className="s"},3000)}async function lb(){try{const r=await fetch(A+"/api/balance");const d=await r.json();const u=d.tokenBalances&&d.tokenBalances.find(t=>t.token.symbol==="USDC"&&!t.token.isNative);document.getElementById("bal").textContent=u?parseFloat(u.amount).toFixed(2):"20.00"}catch(e){document.getElementById("bal").textContent="20.00"}}async function lm(){const r=await fetch(A+"/api/merchants");const ms=await r.json();const em={john:"☕",mary:"🍽️",mike:"🛒"};document.getElementById("ms").innerHTML=Object.entries(ms).map(([k,m])=>"<div class=mc id=\"m-"+k+"\" onclick=\"sm('"+k+"')\" ><div class=me>"+em[k]+"</div><div class=mn>"+m.name+"</div></div>").join("")}function sm(k){document.querySelectorAll(".mc").forEach(c=>c.classList.remove("sel"));document.getElementById("m-"+k).classList.add("sel");sel=k}function initPay(){const a=document.getElementById("amt").value;if(!sel||!a||a==="0"){sh("Select merchant and amount","er");return;}const ms={"john":"John Coffee Shop","mary":"Mary Restaurant","mike":"Mike Grocery"};document.getElementById("conf-detail").textContent="Pay "+a+" USDC to "+ms[sel];document.getElementById("conf").style.display="block";document.getElementById("pb").style.display="none"}function cancelPay(){document.getElementById("conf").style.display="none";document.getElementById("pb").style.display="block"}async function confirmPay(){document.getElementById("conf").style.display="none";await pay();window.scrollTo(0,0)}async function pay(){const a=document.getElementById("amt").value;if(!sel||!a||a==="0"){sh("Select merchant and amount","er");return}sh("Processing on Arc...","ld");document.getElementById("pb").disabled=true;try{const r=await fetch(A+"/api/pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({merchantKey:sel,amount:a})});const d=await r.json();document.getElementById("conf").style.display="none";document.getElementById("pb").style.display="block";if(d.id){sh("Payment sent!","ok");document.getElementById("tid").textContent=d.id;document.getElementById("tc").style.display="block";lb();const ms2={"john":"John Coffee Shop","mary":"Mary Restaurant","mike":"Mike Grocery"};saveTx(ms2[sel],a,d.id)}else sh("Error: "+JSON.stringify(d),"er")}catch(e){sh("Failed: "+e.message,"er")}document.getElementById("pb").disabled=false}let npRaw="";function npRender(){const display=npRaw===""?"0":npRaw;document.getElementById("np-val").innerHTML=display+"<span class=np-cursor></span>";document.getElementById("amt").value=npRaw===""?"0":npRaw}function npKey(k){if(k==="."){if(npRaw.includes("."))return;if(npRaw==="")npRaw="0"}if(npRaw==="0"&&k!==".")npRaw="";if(npRaw.includes(".")){const p=npRaw.split(".");if(p[1].length>=2)return}if(npRaw.replace(".","").length>=7)return;npRaw+=k;npRender()}function npBack(){npRaw=npRaw.slice(0,-1);npRender()}function npPreset(v){npRaw=v;npRender()}let txHistory=JSON.parse(localStorage.getItem("arcpay_tx")||"[]");function renderHistory(){const el=document.getElementById("th");if(txHistory.length===0){el.innerHTML="<div style=text-align:center;color:rgba(255,255,255,.3);font-size:13px;padding:20px>No transactions yet</div>";return}el.innerHTML=txHistory.slice().reverse().map(t=>"<div style=border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:8px;background:rgba(255,255,255,.02)><div style=display:flex;justify-content:space-between;margin-bottom:4px><span style=font-weight:bold;color:#fff>"+t.merchant+"</span><span style=color:#f59e0b;font-weight:bold>"+t.amount+" USDC</span></div><div style=font-size:11px;color:rgba(255,255,255,.4)>"+t.date+"</div><div style=font-size:11px;color:#22c55e;word-break:break-all;margin-top:4px>"+t.id+"</div></div>").join("")}function saveTx(merchant,amount,id){const t={merchant,amount,id,date:new Date().toLocaleString()};txHistory.push(t);localStorage.setItem("arcpay_tx",JSON.stringify(txHistory));renderHistory()}function parseAI(){
-const input = document.getElementById('ai-input').value.toLowerCase();
-const merchants = {john:'john', coffee:'john', mary:'mary', restaurant:'mary', mike:'mike', grocery:'mike'};
-const result = document.getElementById('ai-result');
-let foundMerchant = null;
-let foundAmount = null;
-for(const [key,val] of Object.entries(merchants)){
-  if(input.includes(key)){foundMerchant=val;break}
-}
-const amountMatch = input.match(/\d+(\.\d+)?/);
-if(amountMatch) foundAmount = amountMatch[0];
-if(foundMerchant && foundAmount){
-  sm(foundMerchant);
-  npPreset(foundAmount);
-  result.style.display='block';
-  const names={john:'John Coffee Shop',mary:'Mary Restaurant',mike:'Mike Grocery'};
-  result.textContent='Parsed: '+names[foundMerchant]+' — '+foundAmount+' USDC';
-} else if(!foundMerchant){
-  result.style.display='block';
-  result.style.color='#ef4444';
-  result.textContent='Could not find merchant. Try: pay john 5';
-} else {
-  result.style.display='block';
-  result.style.color='#ef4444';
-  result.textContent='Could not find amount. Try: pay john 5';
-}}
-window.onload=()=>{lb();lm();renderHistory()}</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ArcPay — Borderless Payments</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg:        #0A0C10;
+    --surface:   #111318;
+    --border:    #1E2229;
+    --arc:       #3B82F6;
+    --arc-glow:  rgba(59,130,246,0.18);
+    --usdc:      #2775CA;
+    --usdc-glow: rgba(39,117,202,0.18);
+    --text:      #E8EAF0;
+    --muted:     #6B7280;
+    --success:   #10B981;
+    --error:     #EF4444;
+    --radius:    14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── Header ── */
+  header {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, var(--arc) 0%, #7C3AED 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 0 16px var(--arc-glow);
+  }
+
+  .network-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--arc);
+    border: 1px solid var(--arc);
+    border-radius: 20px;
+    padding: 3px 10px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, var(--arc-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Section label ── */
+  .label {
+    font-size: 0.7rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ── Merchant info ── */
+  .merchant-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .merchant-avatar {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1E3A5F, #2775CA);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .merchant-name {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .merchant-addr {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+    word-break: break-all;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  /* ── Amount input ── */
+  .amount-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .amount-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 100px 16px 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  .amount-input::-webkit-outer-spin-button,
+  .amount-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .amount-input:focus { border-color: var(--arc); }
+
+  .amount-suffix {
+    position: absolute;
+    right: 16px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  /* ── Token selector ── */
+  .token-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .token-btn {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s, background 0.2s;
+    color: var(--text);
+  }
+
+  .token-btn:hover { border-color: var(--muted); }
+
+  .token-btn.active-arc {
+    border-color: var(--arc);
+    background: var(--arc-glow);
+  }
+
+  .token-btn.active-usdc {
+    border-color: var(--usdc);
+    background: var(--usdc-glow);
+  }
+
+  .token-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .dot-arc  { background: linear-gradient(135deg, var(--arc), #7C3AED); color: #fff; }
+  .dot-usdc { background: var(--usdc); color: #fff; }
+
+  .token-info { line-height: 1.2; }
+  .token-name { font-size: 0.85rem; font-weight: 600; }
+  .token-sub  { font-size: 0.65rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  /* ── Wallet status ── */
+  .wallet-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .wallet-left { display: flex; align-items: center; gap: 10px; }
+
+  .wallet-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .wallet-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
+
+  .wallet-status { font-size: 0.8rem; color: var(--muted); }
+  .wallet-status.connected { color: var(--text); }
+
+  .wallet-addr {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .connect-btn {
+    background: transparent;
+    border: 1px solid var(--arc);
+    color: var(--arc);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .connect-btn:hover { background: var(--arc-glow); }
+  .connect-btn.disconnect {
+    border-color: var(--error);
+    color: var(--error);
+  }
+  .connect-btn.disconnect:hover { background: rgba(239,68,68,0.1); }
+
+  /* ── Pay button ── */
+  .pay-btn {
+    width: 100%;
+    padding: 17px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--arc) 0%, #7C3AED 100%);
+    color: #fff;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pay-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pay-btn:not(:disabled):hover { opacity: 0.92; transform: translateY(-1px); }
+  .pay-btn:not(:disabled):active { transform: translateY(0); }
+
+  .pay-btn.usdc-mode {
+    background: linear-gradient(135deg, var(--usdc) 0%, #1a5fa8 100%);
+  }
+
+  /* ── Status message ── */
+  .status-msg {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+    font-family: 'Space Mono', monospace;
+    display: none;
+  }
+  .status-msg.show { display: block; }
+  .status-msg.pending { background: rgba(59,130,246,0.1); border: 1px solid var(--arc); color: var(--arc); }
+  .status-msg.success { background: rgba(16,185,129,0.1); border: 1px solid var(--success); color: var(--success); }
+  .status-msg.error   { background: rgba(239,68,68,0.1);  border: 1px solid var(--error);   color: var(--error); }
+
+  /* ── Tx hash link ── */
+  .tx-link {
+    display: none;
+    margin-top: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--arc);
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .tx-link.show { display: block; }
+  .tx-link:hover { text-decoration: underline; }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 20px;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+  }
+
+  footer a { color: var(--arc); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    ArcPay
+  </div>
+  <span class="network-badge">ARC-TESTNET</span>
+</header>
+
+<div class="card">
+
+  <!-- Merchant -->
+  <div class="label">Paying</div>
+  <div class="merchant-row">
+    <div class="merchant-avatar">🏪</div>
+    <div>
+      <div class="merchant-name">Demo Merchant</div>
+      <div class="merchant-addr" id="merchantAddr">0x0860f2034d826783f49dab2a6927fb28f1bcee8a</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Token (USDC is Arc's native gas token) -->
+  <div class="label">Token</div>
+  <div class="token-grid" style="grid-template-columns: 1fr;">
+    <div class="token-btn active-usdc" style="cursor: default;">
+      <div class="token-dot dot-usdc">$</div>
+      <div class="token-info">
+        <div class="token-name">USDC</div>
+        <div class="token-sub">Native token on Arc</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Amount -->
+  <div class="label">Amount</div>
+  <div class="amount-wrap">
+    <input class="amount-input" id="amountInput" type="number" placeholder="0.00" min="0" step="0.01" />
+    <span class="amount-suffix" id="tokenSuffix">USDC</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Wallet -->
+  <div class="wallet-box">
+    <div class="wallet-left">
+      <div class="wallet-dot" id="walletDot"></div>
+      <div>
+        <div class="wallet-status" id="walletStatus">No wallet connected</div>
+        <div class="wallet-addr" id="walletAddr"></div>
+      </div>
+    </div>
+    <button class="connect-btn" id="connectBtn" onclick="toggleWallet()">Connect</button>
+  </div>
+
+  <!-- Pay -->
+  <button class="pay-btn usdc-mode" id="payBtn" disabled onclick="sendPayment()">
+    Connect wallet to pay
+  </button>
+
+  <!-- Status -->
+  <div class="status-msg" id="statusMsg"></div>
+  <a class="tx-link" id="txLink" target="_blank">View on ArcScan →</a>
+
+  <div class="divider"></div>
+
+  <!-- Bridge to Sepolia -->
+  <div class="label">Cross-Chain (CCTP)</div>
+  <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">
+    Bridge USDC from Arc Testnet → Ethereum Sepolia via Circle's CCTP
+  </div>
+  <button class="pay-btn" id="bridgeBtn" style="background:linear-gradient(135deg,#7C3AED,#3B82F6);" onclick="sendBridge()">
+    Bridge 0.1 USDC to Sepolia
+  </button>
+  <div class="status-msg" id="bridgeStatusMsg"></div>
+  <a class="tx-link" id="burnLink" target="_blank">View burn on ArcScan →</a>
+  <a class="tx-link" id="mintLink" target="_blank">View mint on Sepolia Etherscan →</a>
+
+</div>
+
+<footer>
+  Powered by Circle Programmable Wallets &nbsp;·&nbsp; No MetaMask needed<br/>
+  <a href="https://github.com/Gold406/ArcPay" target="_blank">github.com/Gold406/ArcPay</a>
+</footer>
+
+<script>
+  const BACKEND_URL = 'https://6166a87735b76403-105-112-118-214.serveousercontent.com';
+
+  let selectedToken = 'USDC';
+  let walletConnected = false;
+  let fakeWalletAddr = '';
+
+  function toggleWallet() {
+    if (walletConnected) {
+      walletConnected = false;
+      fakeWalletAddr = '';
+      document.getElementById('walletDot').className = 'wallet-dot';
+      document.getElementById('walletStatus').textContent = 'No wallet connected';
+      document.getElementById('walletStatus').className = 'wallet-status';
+      document.getElementById('walletAddr').textContent = '';
+      document.getElementById('connectBtn').textContent = 'Connect';
+      document.getElementById('connectBtn').className = 'connect-btn disconnect';
+      // reset after 100ms
+      setTimeout(() => {
+        document.getElementById('connectBtn').className = 'connect-btn';
+      }, 100);
+      updatePayBtn();
+      return;
+    }
+
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = 'Connecting…';
+    btn.disabled = true;
+
+    // Simulate Circle Programmable Wallet connection
+    setTimeout(() => {
+      walletConnected = true;
+      fakeWalletAddr = '0x' + [...Array(40)].map(() => Math.floor(Math.random()*16).toString(16)).join('');
+      const short = fakeWalletAddr.slice(0,6) + '…' + fakeWalletAddr.slice(-4);
+
+      document.getElementById('walletDot').className = 'wallet-dot connected';
+      document.getElementById('walletStatus').textContent = 'Circle Wallet · ' + short;
+      document.getElementById('walletStatus').className = 'wallet-status connected';
+      document.getElementById('walletAddr').textContent = fakeWalletAddr;
+      document.getElementById('connectBtn').textContent = 'Disconnect';
+      document.getElementById('connectBtn').className = 'connect-btn disconnect';
+      btn.disabled = false;
+      updatePayBtn();
+    }, 1200);
+  }
+
+  function updatePayBtn() {
+    const btn = document.getElementById('payBtn');
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    if (!walletConnected) {
+      btn.textContent = 'Connect wallet to pay';
+      btn.disabled = true;
+    } else if (!amount || amount <= 0) {
+      btn.textContent = 'Enter an amount';
+      btn.disabled = true;
+    } else {
+      btn.textContent = `Pay ${amount} ${selectedToken}`;
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('amountInput').addEventListener('input', updatePayBtn);
+
+  function setBridgeStatus(type, msg) {
+    const el = document.getElementById('bridgeStatusMsg');
+    el.className = 'status-msg show ' + type;
+    el.textContent = msg;
+  }
+
+  const STAGE_LABELS = {
+    approving: '⏳ Approving USDC spend on Arc...',
+    burning: '🔥 Burning USDC on Arc Testnet...',
+    attesting: '✍️ Waiting for Circle attestation...',
+    minting: '🪙 Minting USDC on Sepolia...',
+  };
+
+  async function sendBridge() {
+    const bridgeBtn = document.getElementById('bridgeBtn');
+    bridgeBtn.disabled = true;
+    bridgeBtn.textContent = 'Bridging...';
+
+    document.getElementById('burnLink').className = 'tx-link';
+    document.getElementById('mintLink').className = 'tx-link';
+
+    setBridgeStatus('pending', STAGE_LABELS.approving);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/bridge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 0.1 }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.bridgeId) throw new Error(data.error || 'Bridge failed to start');
+
+      const bridgeId = data.bridgeId;
+      let done = false;
+      let attempts = 0;
+
+      while (!done && attempts < 60) {
+        await new Promise(r => setTimeout(r, 3000));
+        attempts++;
+
+        const statusRes = await fetch(`${BACKEND_URL}/bridge/${bridgeId}`);
+        const statusData = await statusRes.json();
+
+        if (statusData.error) {
+          throw new Error(statusData.error);
+        }
+
+        if (STAGE_LABELS[statusData.stage]) {
+          setBridgeStatus('pending', STAGE_LABELS[statusData.stage]);
+        }
+
+        if (statusData.burnTxHash) {
+          const burnLink = document.getElementById('burnLink');
+          burnLink.textContent = 'Burn: ' + statusData.burnTxHash.slice(0, 16) + '...';
+          burnLink.href = `https://testnet.arcscan.app/tx/${statusData.burnTxHash}`;
+          burnLink.className = 'tx-link show';
+        }
+
+        if (statusData.stage === 'complete') {
+          done = true;
+          setBridgeStatus('success', '✓ Bridged 0.1 USDC to Sepolia!');
+          const mintLink = document.getElementById('mintLink');
+          mintLink.textContent = 'Mint: ' + statusData.mintTxHash.slice(0, 16) + '...';
+          mintLink.href = `https://sepolia.etherscan.io/tx/${statusData.mintTxHash}`;
+          mintLink.className = 'tx-link show';
+        }
+      }
+
+      if (!done) {
+        setBridgeStatus('pending', '⏳ Still processing — check back shortly.');
+      }
+    } catch (err) {
+      setBridgeStatus('error', `✗ ${err.message}`);
+    }
+
+    bridgeBtn.textContent = 'Bridge 0.1 USDC to Sepolia';
+    bridgeBtn.disabled = false;
+  }
+
+
+  function setStatus(type, msg) {
+    const el = document.getElementById('statusMsg');
+    el.className = 'status-msg show ' + type;
+    el.textContent = msg;
+  }
+
+  async function sendPayment() {
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    if (!amount || amount <= 0) return;
+
+    const payBtn = document.getElementById('payBtn');
+    payBtn.disabled = true;
+    payBtn.textContent = 'Sending…';
+
+    const txLink = document.getElementById('txLink');
+    txLink.className = 'tx-link';
+
+    setStatus('pending', '⏳ Broadcasting transaction to ARC-TESTNET…');
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/pay`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error?.message || data.error || 'Payment failed');
+      }
+
+      setStatus('pending', '⛓ Transaction submitted, confirming on-chain…');
+
+      // Poll for confirmation
+      const txId = data.transactionId;
+      let confirmed = false;
+      let attempts = 0;
+
+      while (!confirmed && attempts < 10) {
+        await new Promise(r => setTimeout(r, 2000));
+        attempts++;
+
+        const statusRes = await fetch(`${BACKEND_URL}/status/${txId}`);
+        const statusData = await statusRes.json();
+
+        if (statusData.state === 'COMPLETE' || statusData.state === 'CONFIRMED') {
+          confirmed = true;
+          setStatus('success', `✓ Payment of ${amount} USDC confirmed!`);
+          if (statusData.txHash) {
+            txLink.textContent = statusData.txHash;
+            txLink.href = `https://testnet.arcscan.app/tx/${statusData.txHash}`;
+            txLink.className = 'tx-link show';
+          }
+        } else if (statusData.state === 'FAILED') {
+          throw new Error('Transaction failed on-chain');
+        }
+      }
+
+      if (!confirmed) {
+        setStatus('pending', `⏳ Still confirming — check ArcScan in a moment. ID: ${txId}`);
+      }
+    } catch (err) {
+      setStatus('error', `✗ ${err.message}`);
+    }
+
+    payBtn.textContent = `Pay ${amount} USDC`;
+    payBtn.disabled = false;
+  }
+</script>
+</body>
+</html>
