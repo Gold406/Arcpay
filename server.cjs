@@ -93,3 +93,40 @@ app.listen(PORT, () => {
   console.log(`ArcPay backend running on http://localhost:${PORT}`);
 });
 
+
+app.post('/swap', async (req, res) => {
+  const { amount } = req.body;
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    return res.status(400).json({ error: 'Invalid amount' });
+  }
+  const DEMO_WALLET_ID = '9f04480b-a0df-5436-bafd-44000e887ebd';
+  const DEMO_WALLET_ADDRESS = '0x4bd1814483dafc95c9ccb0f243ee04002edc68c5';
+  const ARCP_CONTRACT = '0x7edf0f3c0e39ba1caa3144a0e823aaebe247b729';
+  const RATE = 10;
+  try {
+    const usdcLeg = await client.createTransaction({
+      walletId: DEMO_WALLET_ID,
+      tokenId: process.env.USDC_TOKEN_ID,
+      destinationAddress: MERCHANT_ADDRESS,
+      amount: [String(amount)],
+      fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
+    });
+    const arcpAmount = String(Number(amount) * RATE * 1e18).split('.')[0];
+    const arcpLeg = await client.createContractExecutionTransaction({
+      walletId: process.env.WALLET_ID,
+      contractAddress: ARCP_CONTRACT,
+      abiFunctionSignature: 'transfer(address,uint256)',
+      abiParameters: [DEMO_WALLET_ADDRESS, arcpAmount],
+      fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
+    });
+    res.json({
+      success: true,
+      usdcTransactionId: usdcLeg.data.id,
+      arcpTransactionId: arcpLeg.data.id,
+      rate: RATE,
+      swapped: { usdcIn: amount, arcpOut: Number(amount) * RATE }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
