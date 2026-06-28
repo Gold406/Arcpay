@@ -36,6 +36,21 @@ app.post('/pay', async (req, res) => {
       fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
     });
 
+    const rewardAmount = String(Math.floor(Number(amount) * 10) * 1e18);
+    try {
+      const payerWallet = await client.getWallet({ id: process.env.WALLET_ID });
+      await client.createContractExecutionTransaction({
+        walletId: process.env.WALLET_ID,
+        contractAddress: "0x7edf0f3c0e39ba1caa3144a0e823aaebe247b729",
+        abiFunctionSignature: "mintTo(address,uint256)",
+        abiParameters: [payerWallet.data.wallet.address, rewardAmount],
+        fee: { type: "level", config: { feeLevel: "MEDIUM" } },
+      });
+      console.log("Reward mint SUCCESS, amount:", rewardAmount);
+    } catch (rewardErr) {
+      console.error("Reward mint failed (non-blocking):", rewardErr.message);
+    }
+
     res.json({
       success: true,
       transactionId: result.data.id,
