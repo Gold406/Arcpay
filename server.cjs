@@ -174,6 +174,7 @@ app.get('/comparison', async (req, res) => {
   try {
     const ethPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
     const ethPriceData = await ethPriceRes.json();
+    console.log('CoinGecko response:', JSON.stringify(ethPriceData));
     const ethPriceUsd = ethPriceData.ethereum.usd;
     res.json({
       ethereum: {
