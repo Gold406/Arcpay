@@ -71,6 +71,7 @@ app.get('/status/:id', async (req, res) => {
       state: t.state,
       txHash: t.txHash,
       amount: t.amounts,
+      networkFee: t.networkFee,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
