@@ -120,7 +120,7 @@ app.get("/dashboard", async (req, res) => {
       averagePayment: payments.length ? (totalRevenue / payments.length).toFixed(2) : "0.00",
       totalGasFees: totalFees.toFixed(5),
       rewardsIssued: totalRewardsCount,
-      recentPayments: payments.slice(0, 5).map(t => ({ amount: t.amounts[0], date: t.createDate, txHash: t.txHash }))
+      recentPayments: payments.slice(0, 5).map(t => ({ amount: t.amounts[0], date: t.createDate, txHash: t.txHash, screened: !!(t.transactionScreeningEvaluation && t.transactionScreeningEvaluation.screeningDate) }))
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
