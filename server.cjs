@@ -169,3 +169,26 @@ app.post('/swap', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.get('/comparison', async (req, res) => {
+  try {
+    const ethPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+    const ethPriceData = await ethPriceRes.json();
+    const ethPriceUsd = ethPriceData.ethereum.usd;
+    res.json({
+      ethereum: {
+        note: 'Reference figures based on 2025-2026 average mainnet conditions (post-Dencun upgrade)',
+        estimatedCostUsd: '0.05-0.50',
+        estimatedTimeSeconds: '15-180',
+        currentEthPriceUsd: ethPriceUsd
+      },
+      arc: {
+        estimatedCostUsd: '0.001-0.005',
+        estimatedTimeSeconds: '1-3'
+      },
+      fetchedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
