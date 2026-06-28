@@ -104,6 +104,29 @@ app.get('/transactions', async (req, res) => {
   }
 });
 
+app.get("/dashboard", async (req, res) => {
+  try {
+    const arcTxs = await client.listTransactions({ walletIds: [process.env.WALLET_ID] });
+    const sepoliaTxs = await client.listTransactions({ walletIds: ["22d4f072-b405-554c-a3dc-dc7602cf972e"] });
+    const all = [...arcTxs.data.transactions, ...sepoliaTxs.data.transactions].filter(t => t.state === "COMPLETE");
+    const payments = all.filter(t => t.transactionType === "OUTBOUND" && t.destinationAddress === MERCHANT_ADDRESS && t.amounts && t.amounts.length > 0);
+    const rewards = all.filter(t => t.contractAddress === "0x7edf0f3c0e39ba1caa3144a0e823aaebe247b729" && t.transactionType === "OUTBOUND");
+    const totalRevenue = payments.reduce((sum, t) => sum + parseFloat(t.amounts[0] || 0), 0);
+    const totalFees = all.reduce((sum, t) => sum + parseFloat(t.networkFee || 0), 0);
+    const totalRewardsCount = rewards.length;
+    res.json({
+      totalRevenue: totalRevenue.toFixed(2),
+      transactionCount: payments.length,
+      averagePayment: payments.length ? (totalRevenue / payments.length).toFixed(2) : "0.00",
+      totalGasFees: totalFees.toFixed(5),
+      rewardsIssued: totalRewardsCount,
+      recentPayments: payments.slice(0, 5).map(t => ({ amount: t.amounts[0], date: t.createDate, txHash: t.txHash }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`ArcPay backend running on http://localhost:${PORT}`);
