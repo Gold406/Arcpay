@@ -184,3 +184,30 @@ app.get('/comparison', (req, res) => {
     fetchedAt: new Date().toISOString()
   });
 });
+
+app.get('/token-info', async (req, res) => {
+  try {
+    const { initiateSmartContractPlatformClient } = require('@circle-fin/smart-contract-platform');
+    const scp = initiateSmartContractPlatformClient({ apiKey: process.env.API_KEY, entitySecret: process.env.ENTITY_SECRET });
+    const ARCP_CONTRACT = '0x7edf0f3c0e39ba1caa3144a0e823aaebe247b729';
+    const ARCP_ABI_TOTAL = '[{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]';
+    const ARCP_ABI_BALANCE = '[{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]';
+    const [supplyRes, balanceRes] = await Promise.all([
+      scp.queryContract({ address: ARCP_CONTRACT, blockchain: 'ARC-TESTNET', abiFunctionSignature: 'totalSupply()', abiParameters: [], abiJson: ARCP_ABI_TOTAL }),
+      scp.queryContract({ address: ARCP_CONTRACT, blockchain: 'ARC-TESTNET', abiFunctionSignature: 'balanceOf(address)', abiParameters: [MERCHANT_ADDRESS], abiJson: ARCP_ABI_BALANCE })
+    ]);
+    const totalSupply = (BigInt(supplyRes.data.outputValues[0]) / BigInt(1e18)).toString();
+    const balance = (BigInt(balanceRes.data.outputValues[0]) / BigInt(1e18)).toString();
+    res.json({
+      contract: ARCP_CONTRACT,
+      blockchain: 'ARC-TESTNET',
+      name: 'ArcPoints',
+      symbol: 'ARCP',
+      totalSupply,
+      merchantBalance: balance,
+      explorerUrl: `https://testnet.arcscan.app/address/${ARCP_CONTRACT}`
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
