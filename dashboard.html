@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ArcPay — Merchant Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0A0C10; --surface: #111318; --border: #1E2229;
+    --text: #E8EAF0; --muted: #6B7280; --success: #10B981; --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh; padding: 24px 16px 48px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header { width: 100%; max-width: 440px; margin-bottom: 28px; }
+  .logo { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1.15rem; }
+  .back-link { color: var(--muted); font-size: 0.85rem; text-decoration: none; }
+  .stats-grid {
+    width: 100%; max-width: 440px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .stat-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 1.6rem; font-weight: 700; margin-top: 6px; }
+  .stat-value.green { color: var(--success); }
+  .recent-section { width: 100%; max-width: 440px; }
+  .recent-title { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 12px; }
+  .recent-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    text-decoration: none; color: var(--text);
+  }
+  .recent-hash { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+  .recent-amount { font-family: 'Space Mono', monospace; color: var(--success); font-weight: 700; }
+  .loading { color: var(--muted); text-align: center; padding: 40px; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--success);
+  color: #06150F;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 14px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(16,185,129,0.4);
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 100;
+  max-width: 90%;
+  text-align: center;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<header>
+  <div class="logo">⚡ ArcPay Dashboard</div>
+  <a class="back-link" href="/">← Back to payments</a> · <a href="/token.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">🪙 ARCP Token</a>
+</header>
+<div class="stats-grid" id="statsGrid">
+  <div class="loading">Loading stats...</div>
+</div>
+<div class="recent-section">
+  <div class="recent-title">Recent Payments</div>
+  <div id="recentList"></div>
+</div>
+<script>
+const BACKEND_URL = 'https://arcpay-m731.onrender.com';
+let lastTxCount = null;
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 4000);
+}
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/dashboard`);
+    const data = await res.json();
+    if (lastTxCount !== null && data.transactionCount > lastTxCount) {
+      const newest = data.recentPayments[0];
+      showToast("🔔 New payment received: " + newest.amount + " USDC");
+    }
+    lastTxCount = data.transactionCount;
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value">$${data.totalRevenue}</div></div>
+      <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value">${data.transactionCount}</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Payment</div><div class="stat-value">$${data.averagePayment}</div></div>
+      <div class="stat-card"><div class="stat-label">Rewards Issued</div><div class="stat-value green">${data.rewardsIssued}</div></div>
+      <div class="stat-card" style="grid-column: span 2;"><div class="stat-label">Total Gas Fees Paid</div><div class="stat-value green">$${data.totalGasFees}</div></div>
+    `;
+    const list = document.getElementById('recentList');
+    if (data.recentPayments.length === 0) {
+      list.innerHTML = '<div class="loading">No payments yet</div>';
+    } else {
+      list.innerHTML = data.recentPayments.map(p => `
+        <a class="recent-item" href="https://testnet.arcscan.app/tx/${p.txHash}" target="_blank">
+          <span class="recent-hash">${p.txHash.slice(0,10)}...${p.txHash.slice(-6)} ${p.screened ? "<span style=\"color:var(--success);font-size:0.7rem;\">✓ Screened</span>" : ""}</span>
+          <span class="recent-amount">${p.amount} USDC</span>
+        </a>
+      `).join('');
+    }
+  } catch (err) {
+    document.getElementById('statsGrid').innerHTML = '<div class="loading">Failed to load stats</div>';
+  }
+}
+loadDashboard();
+setInterval(loadDashboard, 10000);
+</script>
+</body>
+</html>

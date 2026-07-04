@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ArcPay — Borderless Payments</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg:        #0A0C10;
+    --surface:   #111318;
+    --border:    #1E2229;
+    --arc:       #3B82F6;
+    --arc-glow:  rgba(59,130,246,0.18);
+    --usdc:      #2775CA;
+    --usdc-glow: rgba(39,117,202,0.18);
+    --text:      #E8EAF0;
+    --muted:     #6B7280;
+    --success:   #10B981;
+    --error:     #EF4444;
+    --radius:    14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── Header ── */
+  header {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, var(--arc) 0%, #7C3AED 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 0 16px var(--arc-glow);
+  }
+
+  .network-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--arc);
+    border: 1px solid var(--arc);
+    border-radius: 20px;
+    padding: 3px 10px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, var(--arc-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Section label ── */
+  .label {
+    font-size: 0.7rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ── Merchant info ── */
+  .merchant-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .merchant-avatar {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1E3A5F, #2775CA);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .merchant-name {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .merchant-addr {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+    word-break: break-all;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  /* ── Amount input ── */
+  .amount-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .amount-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 100px 16px 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  .amount-input::-webkit-outer-spin-button,
+  .amount-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .amount-input:focus { border-color: var(--arc); }
+
+  .amount-suffix {
+    position: absolute;
+    right: 16px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  /* ── Token selector ── */
+  .token-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .token-btn {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s, background 0.2s;
+    color: var(--text);
+  }
+
+  .token-btn:hover { border-color: var(--muted); }
+
+  .token-btn.active-arc {
+    border-color: var(--arc);
+    background: var(--arc-glow);
+  }
+
+  .token-btn.active-usdc {
+    border-color: var(--usdc);
+    background: var(--usdc-glow);
+  }
+
+  .token-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .dot-arc  { background: linear-gradient(135deg, var(--arc), #7C3AED); color: #fff; }
+  .dot-usdc { background: var(--usdc); color: #fff; }
+
+  .token-info { line-height: 1.2; }
+  .token-name { font-size: 0.85rem; font-weight: 600; }
+  .token-sub  { font-size: 0.65rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  /* ── Wallet status ── */
+  .wallet-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .wallet-left { display: flex; align-items: center; gap: 10px; }
+
+  .wallet-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .wallet-dot.connected { background: var(--success); box-shadow: 0 0 6px var(--success); }
+
+  .wallet-status { font-size: 0.8rem; color: var(--muted); }
+  .wallet-status.connected { color: var(--text); }
+
+  .wallet-addr {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .connect-btn {
+    background: transparent;
+    border: 1px solid var(--arc);
+    color: var(--arc);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .connect-btn:hover { background: var(--arc-glow); }
+  .connect-btn.disconnect {
+    border-color: var(--error);
+    color: var(--error);
+  }
+  .connect-btn.disconnect:hover { background: rgba(239,68,68,0.1); }
+
+  /* ── Pay button ── */
+  .pay-btn {
+    width: 100%;
+    padding: 17px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--arc) 0%, #7C3AED 100%);
+    color: #fff;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pay-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pay-btn:not(:disabled):hover { opacity: 0.92; transform: translateY(-1px); }
+  .pay-btn:not(:disabled):active { transform: translateY(0); }
+
+  .pay-btn.usdc-mode {
+    background: linear-gradient(135deg, var(--usdc) 0%, #1a5fa8 100%);
+  }
+
+  /* ── Status message ── */
+  .status-msg {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+    font-family: 'Space Mono', monospace;
+    display: none;
+  }
+  .status-msg.show { display: block; }
+  .status-msg.pending { background: rgba(59,130,246,0.1); border: 1px solid var(--arc); color: var(--arc); }
+  .status-msg.success { background: rgba(16,185,129,0.1); border: 1px solid var(--success); color: var(--success); }
+  .status-msg.error   { background: rgba(239,68,68,0.1);  border: 1px solid var(--error);   color: var(--error); }
+
+  /* ── Tx hash link ── */
+  .tx-link {
+    display: none;
+    margin-top: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--arc);
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .tx-link.show { display: block; }
+  .tx-link:hover { text-decoration: underline; }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 20px;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+  }
+
+  footer a { color: var(--arc); text-decoration: none; }
+
+/* — Live Proof Feed — */
+.feed-section {
+  width: 100%;
+  max-width: 440px;
+  margin-top: 28px;
+}
+.feed-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.feed-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 0 rgba(16,185,129,0.6);
+  animation: feedPulse 2s infinite;
+}
+@keyframes feedPulse {
+  0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+  100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+.feed-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.feed-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+.feed-item-left { display: flex; flex-direction: column; gap: 3px; }
+.feed-hash {
+  font-family: 'Space Mono', monospace;
+  color: var(--text);
+  font-size: 0.8rem;
+}
+.feed-chain { color: var(--muted); font-size: 0.72rem; }
+.feed-amount {
+  font-family: 'Space Mono', monospace;
+  color: var(--success);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.feed-amount.empty { color: var(--muted); font-weight: 400; }
+.feed-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 16px;
+}
+
+/* — Swap Card — */
+.swap-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 24px;
+}
+.swap-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.swap-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.swap-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  flex: 1;
+}
+.swap-input {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+}
+.swap-arrow {
+  color: var(--muted);
+  font-size: 1.2rem;
+  margin: 0 4px;
+}
+.swap-output {
+  font-family: 'Space Mono', monospace;
+  color: var(--success);
+  font-weight: 700;
+  font-size: 1rem;
+}
+.swap-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg,#10B981,#059669);
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.swap-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.swap-status {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+  min-height: 18px;
+}
+
+.qr-toggle-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.qr-toggle-btn:active { background: rgba(255,255,255,0.05); }
+
+/* — Comparison Widget — */
+.compare-section {
+  width: 100%;
+  max-width: 440px;
+  margin-top: 28px;
+}
+.compare-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.compare-table th {
+  padding: 10px 14px;
+  text-align: left;
+  color: var(--muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-arc { color: var(--success); font-weight: 700; }
+.compare-eth { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    ArcPay
+  </div>
+  <span class="network-badge">ARC-TESTNET</span>
+  <a href="/dashboard.html" style="color:var(--muted);font-size:0.78rem;text-decoration:none;margin-left:12px;">📊 Dashboard</a>
+  <button id="langToggle" onclick="toggleLang()" style="background:none;border:1px solid var(--muted);color:var(--muted);font-size:0.75rem;padding:4px 10px;border-radius:8px;margin-left:8px;cursor:pointer;">EN / ES</button>
+</header>
+
+<div class="card">
+
+  <!-- Merchant -->
+  <div class="label" data-i18n="paying">Paying</div>
+  <div class="merchant-row">
+    <div class="merchant-avatar">🏪</div>
+    <div>
+      <div class="merchant-name">Demo Merchant</div>
+      <div class="merchant-addr" id="merchantAddr">0x0860f2034d826783f49dab2a6927fb28f1bcee8a</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Token (USDC is Arc's native gas token) -->
+  <div class="label" data-i18n="token">Token</div>
+  <div class="token-grid" style="grid-template-columns: 1fr;">
+    <div class="token-btn active-usdc" style="cursor: default;">
+      <div class="token-dot dot-usdc">$</div>
+      <div class="token-info">
+        <div class="token-name">USDC</div>
+        <div class="token-sub">Native token on Arc</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Amount -->
+  <div class="label" data-i18n="amount">Amount</div>
+  <div class="amount-wrap">
+    <input class="amount-input" id="amountInput" type="number" placeholder="0.00" min="0" step="0.01" />
+    <span class="amount-suffix" id="tokenSuffix">USDC</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Wallet -->
+  <div class="wallet-box">
+    <div class="wallet-left">
+      <div class="wallet-dot" id="walletDot"></div>
+      <div>
+        <div class="wallet-status" id="walletStatus">No wallet connected</div>
+        <div class="wallet-addr" id="walletAddr"></div>
+      </div>
+    </div>
+    <button class="connect-btn" id="connectBtn" onclick="toggleWallet()">Connect</button>
+  </div>
+
+  <!-- Pay -->
+  <button class="pay-btn usdc-mode" id="payBtn" disabled onclick="sendPayment()">
+    Connect wallet to pay
+  </button>
+
+  <!-- Status -->
+  <div class="status-msg" id="statusMsg"></div>
+  <a class="tx-link" id="txLink" target="_blank">View on ArcScan →</a>
+
+  <button class="qr-toggle-btn" onclick="toggleQR()" type="button">📱 Show QR Code to Pay</button>
+  <div id="qrContainer" style="display:none; text-align:center; margin-top:14px;">
+    <div id="qrcode" style="display:inline-block; padding:12px; background:white; border-radius:12px;"></div>
+    <div style="color:var(--muted); font-size:0.78rem; margin-top:8px;">Scan to view payment details</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Bridge to Sepolia -->
+  <div class="label" data-i18n="crossChain">Cross-Chain (CCTP)</div>
+  <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">
+    Bridge USDC from Arc Testnet → Ethereum Sepolia via Circle's CCTP
+  </div>
+  <button class="pay-btn" id="bridgeBtn" style="background:linear-gradient(135deg,#7C3AED,#3B82F6);" onclick="sendBridge()">
+    Bridge 0.1 USDC to Sepolia
+  </button>
+  <div class="status-msg" id="bridgeStatusMsg"></div>
+  <a class="tx-link" id="burnLink" target="_blank">View burn on ArcScan →</a>
+  <a class="tx-link" id="mintLink" target="_blank">View mint on Sepolia Etherscan →</a>
+
+</div>
+
+<footer>
+  Powered by Circle Programmable Wallets &nbsp;·&nbsp; No MetaMask needed<br/>
+  <a href="https://github.com/Gold406/ArcPay" target="_blank">github.com/Gold406/ArcPay</a>
+</footer>
+
+<div class="compare-section">
+  <div class="compare-title">⚡ Arc vs Ethereum Mainnet</div>
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>Arc Testnet</th><th>ETH Mainnet</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Cost</td>
+        <td class="compare-arc" id="arcCost">$0.001-0.005</td>
+        <td class="compare-eth" id="ethCost">$0.05-0.50</td>
+      </tr>
+      <tr>
+        <td>Speed</td>
+        <td class="compare-arc" id="arcSpeed">1-3s</td>
+        <td class="compare-eth" id="ethSpeed">15-180s</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="swap-card">
+  <div class="swap-title" data-i18n="swapTitle">Swap USDC &#8594; ARCP</div>
+  <div class="swap-row">
+    <div class="swap-input-wrap">
+      <input type="number" class="swap-input" id="swapAmount" placeholder="0.0" min="0" step="0.1" value="1" oninput="updateSwapPreview()">
+      <span style="color:var(--muted);font-size:0.85rem;">USDC</span>
+    </div>
+    <div class="swap-arrow">&#8594;</div>
+    <div class="swap-output" id="swapOutput">10 ARCP</div>
+  </div>
+  <button class="swap-btn" id="swapBtn" onclick="doSwap()">Swap Now</button>
+  <div class="swap-status" id="swapStatus"></div>
+</div>
+
+<div class="feed-section">
+  <div class="feed-header">
+    <div class="feed-dot"></div>
+    <div class="feed-title" data-i18n="liveFeed">Live Cross-Chain Proof Feed</div>
+  </div>
+  <div class="feed-list" id="feedList">
+    <div class="feed-empty">Loading recent transfers...</div>
+  </div>
+</div>
+
+<script>
+
+async function loadComparison() {
+  try {
+    const res = await fetch(FEED_API.replace("/transactions", "/comparison"));
+    const data = await res.json();
+    document.getElementById("arcCost").textContent = "$" + data.arc.estimatedCostUsd;
+    document.getElementById("ethCost").textContent = "$" + data.ethereum.estimatedCostUsd;
+    document.getElementById("arcSpeed").textContent = data.arc.estimatedTimeSeconds + "s";
+    document.getElementById("ethSpeed").textContent = data.ethereum.estimatedTimeSeconds + "s";
+  } catch (err) {
+    console.log("Comparison fetch failed:", err.message);
+  }
+}
+loadComparison();
+
+const translations = {
+  en: { paying: "Paying", token: "Token", amount: "Amount", crossChain: "Cross-Chain (CCTP)", swapTitle: "Swap USDC &#8594; ARCP", liveFeed: "Live Cross-Chain Proof Feed" },
+  es: { paying: "Pagando", token: "Token", amount: "Cantidad", crossChain: "Entre Cadenas (CCTP)", swapTitle: "Cambiar USDC &#8594; ARCP", liveFeed: "Feed de Pruebas en Vivo" }
+};
+let currentLang = "en";
+function toggleLang() {
+  currentLang = currentLang === "en" ? "es" : "en";
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (translations[currentLang][key]) {
+      el.innerHTML = translations[currentLang][key];
+    }
+  });
+  document.getElementById("langToggle").textContent = currentLang === "en" ? "EN / ES" : "ES / EN";
+}
+
+let qrGenerated = false;
+function toggleQR() {
+  const container = document.getElementById("qrContainer");
+  const amount = document.getElementById("amountInput").value || "0";
+  if (container.style.display === "none") {
+    container.style.display = "block";
+    if (!qrGenerated) {
+      const qrData = `arcpay:pay?to=0x0860f2034d826783f49dab2a6927fb28f1bcee8a&amount=${amount}&token=USDC&chain=ARC-TESTNET`;
+      new QRCode(document.getElementById("qrcode"), {
+        text: qrData,
+        width: 180,
+        height: 180,
+        colorDark: "#000000",
+        colorLight: "#ffffff"
+      });
+      qrGenerated = true;
+    }
+  } else {
+    container.style.display = "none";
+  }
+}
+
+const SWAP_RATE = 10;
+function updateSwapPreview() {
+  const amt = parseFloat(document.getElementById("swapAmount").value) || 0;
+  document.getElementById("swapOutput").textContent = (amt * SWAP_RATE) + " ARCP";
+}
+async function doSwap() {
+  const amt = document.getElementById("swapAmount").value;
+  const btn = document.getElementById("swapBtn");
+  const status = document.getElementById("swapStatus");
+  if (!amt || Number(amt) <= 0) {
+    status.textContent = "Enter a valid amount";
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "Swapping...";
+  status.textContent = "Submitting swap on Arc Testnet...";
+  try {
+    const res = await fetch(FEED_API.replace("/transactions", "/swap"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: amt })
+    });
+    const data = await res.json();
+    if (data.success) {
+      status.textContent = "Swapped " + data.swapped.usdcIn + " USDC for " + data.swapped.arcpOut + " ARCP";
+      loadFeed();
+    } else {
+      status.textContent = "Error: " + (data.error || "swap failed");
+    }
+  } catch (err) {
+    status.textContent = "Network error - try again";
+  }
+  btn.disabled = false;
+  btn.textContent = "Swap Now";
+}
+
+const FEED_API = 'https://arcpay-m731.onrender.com/transactions';
+
+function shortenHash(h) {
+  return h.slice(0, 8) + '...' + h.slice(-6);
+}
+
+function timeAgo(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return diff + 's ago';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  return Math.floor(diff / 3600) + 'h ago';
+}
+
+async function loadFeed() {
+  const list = document.getElementById('feedList');
+  try {
+    const res = await fetch(FEED_API);
+    const data = await res.json();
+    const txs = data.transactions || [];
+    if (txs.length === 0) {
+      list.innerHTML = '<div class="feed-empty">No transfers yet</div>';
+      return;
+    }
+    list.innerHTML = txs.map(t => {
+      const hasAmount = t.amounts && t.amounts.length > 0;
+      const amountText = hasAmount ? t.amounts[0] + ' USDC' : 'attesting...';
+      const explorerBase = t.blockchain === 'ARC-TESTNET'
+        ? 'https://testnet.arcscan.app/tx/'
+        : 'https://sepolia.etherscan.io/tx/';
+      return '<a class="feed-item" href="' + explorerBase + t.txHash + '" target="_blank" style="text-decoration:none;">'
+        + '<div class="feed-item-left">'
+        + '<div class="feed-hash">' + shortenHash(t.txHash) + '</div>'
+        + '<div class="feed-chain">' + t.blockchain + ' · ' + timeAgo(t.updateDate) + '</div>'
+        + '</div>'
+        + '<div class="feed-amount' + (hasAmount ? '' : ' empty') + '">' + amountText + '</div>'
+        + '</a>';
+    }).join('');
+  } catch (err) {
+    list.innerHTML = '<div class="feed-empty">Feed temporarily unavailable</div>';
+  }
+}
+
+loadFeed();
+setInterval(loadFeed, 8000);
+  const BACKEND_URL = 'https://arcpay-m731.onrender.com';
+
+  let selectedToken = 'USDC';
+  let walletConnected = false;
+  let fakeWalletAddr = '';
+
+  function toggleWallet() {
+    if (walletConnected) {
+      walletConnected = false;
+      fakeWalletAddr = '';
+      document.getElementById('walletDot').className = 'wallet-dot';
+      document.getElementById('walletStatus').textContent = 'No wallet connected';
+      document.getElementById('walletStatus').className = 'wallet-status';
+      document.getElementById('walletAddr').textContent = '';
+      document.getElementById('connectBtn').textContent = 'Connect';
+      document.getElementById('connectBtn').className = 'connect-btn disconnect';
+      // reset after 100ms
+      setTimeout(() => {
+        document.getElementById('connectBtn').className = 'connect-btn';
+      }, 100);
+      updatePayBtn();
+      return;
+    }
+
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = 'Connecting…';
+    btn.disabled = true;
+
+    // Simulate Circle Programmable Wallet connection
+    setTimeout(() => {
+      walletConnected = true;
+      fakeWalletAddr = '0x' + [...Array(40)].map(() => Math.floor(Math.random()*16).toString(16)).join('');
+      const short = fakeWalletAddr.slice(0,6) + '…' + fakeWalletAddr.slice(-4);
+
+      document.getElementById('walletDot').className = 'wallet-dot connected';
+      document.getElementById('walletStatus').textContent = 'Circle Wallet · ' + short;
+      document.getElementById('walletStatus').className = 'wallet-status connected';
+      document.getElementById('walletAddr').textContent = fakeWalletAddr;
+      document.getElementById('connectBtn').textContent = 'Disconnect';
+      document.getElementById('connectBtn').className = 'connect-btn disconnect';
+      btn.disabled = false;
+      updatePayBtn();
+    }, 1200);
+  }
+
+  function updatePayBtn() {
+    const btn = document.getElementById('payBtn');
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    if (!walletConnected) {
+      btn.textContent = 'Connect wallet to pay';
+      btn.disabled = true;
+    } else if (!amount || amount <= 0) {
+      btn.textContent = 'Enter an amount';
+      btn.disabled = true;
+    } else {
+      btn.textContent = `Pay ${amount} ${selectedToken}`;
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('amountInput').addEventListener('input', updatePayBtn);
+
+  function setBridgeStatus(type, msg) {
+    const el = document.getElementById('bridgeStatusMsg');
+    el.className = 'status-msg show ' + type;
+    el.textContent = msg;
+  }
+
+  const STAGE_LABELS = {
+    approving: '⏳ Approving USDC spend on Arc...',
+    burning: '🔥 Burning USDC on Arc Testnet...',
+    attesting: '✍️ Waiting for Circle attestation...',
+    minting: '🪙 Minting USDC on Sepolia...',
+  };
+
+  async function sendBridge() {
+    const bridgeBtn = document.getElementById('bridgeBtn');
+    bridgeBtn.disabled = true;
+    bridgeBtn.textContent = 'Bridging...';
+
+    document.getElementById('burnLink').className = 'tx-link';
+    document.getElementById('mintLink').className = 'tx-link';
+
+    setBridgeStatus('pending', STAGE_LABELS.approving);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/bridge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 0.1 }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.bridgeId) throw new Error(data.error || 'Bridge failed to start');
+
+      const bridgeId = data.bridgeId;
+      let done = false;
+      let attempts = 0;
+
+      while (!done && attempts < 60) {
+        await new Promise(r => setTimeout(r, 3000));
+        attempts++;
+
+        const statusRes = await fetch(`${BACKEND_URL}/bridge/${bridgeId}`);
+        const statusData = await statusRes.json();
+
+        if (statusData.error) {
+          throw new Error(statusData.error);
+        }
+
+        if (STAGE_LABELS[statusData.stage]) {
+          setBridgeStatus('pending', STAGE_LABELS[statusData.stage]);
+        }
+
+        if (statusData.burnTxHash) {
+          const burnLink = document.getElementById('burnLink');
+          burnLink.textContent = 'Burn: ' + statusData.burnTxHash.slice(0, 16) + '...';
+          burnLink.href = `https://testnet.arcscan.app/tx/${statusData.burnTxHash}`;
+          burnLink.className = 'tx-link show';
+        }
+
+        if (statusData.stage === 'complete') {
+          done = true;
+          setBridgeStatus('success', '✓ Bridged 0.1 USDC to Sepolia!');
+          const mintLink = document.getElementById('mintLink');
+          mintLink.textContent = 'Mint: ' + statusData.mintTxHash.slice(0, 16) + '...';
+          mintLink.href = `https://sepolia.etherscan.io/tx/${statusData.mintTxHash}`;
+          mintLink.className = 'tx-link show';
+        }
+      }
+
+      if (!done) {
+        setBridgeStatus('pending', '⏳ Still processing — check back shortly.');
+      }
+    } catch (err) {
+      setBridgeStatus('error', `✗ ${err.message}`);
+    }
+
+    bridgeBtn.textContent = 'Bridge 0.1 USDC to Sepolia';
+    bridgeBtn.disabled = false;
+  }
+
+
+  function setStatus(type, msg) {
+    const el = document.getElementById('statusMsg');
+    el.className = 'status-msg show ' + type;
+    el.textContent = msg;
+  }
+
+  async function sendPayment() {
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    if (!amount || amount <= 0) return;
+
+    const payBtn = document.getElementById('payBtn');
+    payBtn.disabled = true;
+    payBtn.textContent = 'Sending…';
+
+    const txLink = document.getElementById('txLink');
+    txLink.className = 'tx-link';
+
+    setStatus('pending', '⏳ Broadcasting transaction to ARC-TESTNET…');
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/pay`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error?.message || data.error || 'Payment failed');
+      }
+
+      setStatus('pending', '⛓ Transaction submitted, confirming on-chain…');
+
+      // Poll for confirmation
+      const txId = data.transactionId;
+      let confirmed = false;
+      let attempts = 0;
+
+      while (!confirmed && attempts < 10) {
+        await new Promise(r => setTimeout(r, 2000));
+        attempts++;
+
+        const statusRes = await fetch(`${BACKEND_URL}/status/${txId}`);
+        const statusData = await statusRes.json();
+
+        if (statusData.state === 'COMPLETE' || statusData.state === 'CONFIRMED') {
+          confirmed = true;
+          setStatus('success', `✓ Payment confirmed! You earned ${(amount * 10).toFixed(0)} ARCP loyalty points · Gas cost: $${Number(statusData.networkFee || 0).toFixed(5)}`);
+          if (statusData.txHash) {
+            txLink.textContent = statusData.txHash;
+            txLink.href = `https://testnet.arcscan.app/tx/${statusData.txHash}`;
+            txLink.className = 'tx-link show';
+          }
+        } else if (statusData.state === 'FAILED') {
+          throw new Error('Transaction failed on-chain');
+        }
+      }
+
+      if (!confirmed) {
+        setStatus('pending', `⏳ Still confirming — check ArcScan in a moment. ID: ${txId}`);
+      }
+    } catch (err) {
+      setStatus('error', `✗ ${err.message}`);
+    }
+
+    payBtn.textContent = `Pay ${amount} USDC`;
+    payBtn.disabled = false;
+  }
+</script>
+</body>
+</html>

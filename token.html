@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ArcPay — ARCP Token Explorer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0A0C10; --surface: #111318; --border: #1E2229;
+    --text: #E8EAF0; --muted: #6B7280; --success: #10B981;
+    --arc: #3B82F6; --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh; padding: 24px 16px 48px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header { width: 100%; max-width: 440px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1.1rem; }
+  .back-link { color: var(--muted); font-size: 0.85rem; text-decoration: none; }
+  .token-card {
+    width: 100%; max-width: 440px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+  }
+  .token-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .token-icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, #10B981, #059669);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 700; font-family: 'Space Mono', monospace;
+  }
+  .token-name { font-size: 1.2rem; font-weight: 700; }
+  .token-symbol { color: var(--muted); font-size: 0.85rem; }
+  .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: var(--muted); font-size: 0.85rem; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 0.9rem; }
+  .stat-value.green { color: var(--success); }
+  .contract-section { width: 100%; max-width: 440px; }
+  .contract-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 8px; }
+  .contract-address {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    word-break: break-all; color: var(--arc);
+    display: block; text-decoration: none;
+  }
+  .loading { color: var(--muted); text-align: center; padding: 40px; }
+  .badge { display: inline-block; background: rgba(16,185,129,0.15); color: var(--success); font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; margin-left: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚡ ARCP Explorer</div>
+  <a class="back-link" href="/">← Back</a>
+</header>
+<div class="token-card" id="tokenCard">
+  <div class="loading">Loading token data...</div>
+</div>
+<div class="contract-section">
+  <div class="contract-label">Contract Address</div>
+  <a class="contract-address" id="contractLink" href="#" target="_blank">Loading...</a>
+</div>
+<script>
+const BACKEND = 'https://arcpay-m731.onrender.com';
+async function loadToken() {
+  try {
+    const res = await fetch(`${BACKEND}/token-info`);
+    const d = await res.json();
+    document.getElementById('tokenCard').innerHTML = `
+      <div class="token-header">
+        <div class="token-icon">A</div>
+        <div>
+          <div class="token-name">${d.name} <span class="badge">ARC-TESTNET</span></div>
+          <div class="token-symbol">${d.symbol} · ERC-20 Loyalty Token</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Total Supply</span>
+        <span class="stat-value green">${Number(d.totalSupply).toLocaleString()} ARCP</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Merchant Balance</span>
+        <span class="stat-value">${Number(d.merchantBalance).toLocaleString()} ARCP</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Blockchain</span>
+        <span class="stat-value">${d.blockchain}</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Standard</span>
+        <span class="stat-value">ERC-20</span>
+      </div>
+    `;
+    const link = document.getElementById('contractLink');
+    link.textContent = d.contract;
+    link.href = d.explorerUrl;
+  } catch (err) {
+    document.getElementById('tokenCard').innerHTML = '<div class="loading">Failed to load token data</div>';
+  }
+}
+loadToken();
+setInterval(loadToken, 15000);
+</script>
+</body>
+</html>
